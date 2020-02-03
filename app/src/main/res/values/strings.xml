@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GitUserSearch</string>
+    <string name="search">Search</string>
+    <string name="like">Like</string>
+</resources>
