@@ -56,13 +56,13 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_constraintHorizontal_chainStyle="packed"
+                android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/btn_search"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:viewModel="@{vm}"
-                app:items="@{vm.items}" />
+                app:items="@{vm.items}"
+                tools:listitem="@layout/item_search"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

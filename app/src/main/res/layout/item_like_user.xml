@@ -11,13 +11,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="80dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/user_avatar"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_margin="5dp"
             app:avatarUrl="@{item.avatar_url}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
