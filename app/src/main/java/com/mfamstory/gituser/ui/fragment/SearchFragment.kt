@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.mfamstory.gituser.R
 import com.mfamstory.gituser.databinding.FragmentSearchBinding
+import com.mfamstory.gituser.ui.adapter.UserAdapter
 import com.mfamstory.gituser.ui.viewmodel.SearchViewModel
 import com.mfamstory.gituser.util.hideKeyboard
 import kotlinx.android.synthetic.main.fragment_search.*
@@ -32,8 +33,20 @@ class SearchFragment : BindingFragment<FragmentSearchBinding>() {
         binding.vm = vm
         binding.lifecycleOwner = this.viewLifecycleOwner
 
+        initAdapter(vm)
+
         vm.hideKeyboard.observe(this.viewLifecycleOwner, Observer {
             hideKeyboard()
+        })
+
+        vm.isDataEmpty.observe(this.viewLifecycleOwner, Observer {
+            // SetEmptyView
+            Snackbar.make(view, "DataEmpty", Snackbar.LENGTH_SHORT).show()
+        })
+
+        vm.isNetworkError.observe(this.viewLifecycleOwner, Observer {
+            // Network Error
+            Snackbar.make(view, it, Snackbar.LENGTH_SHORT).show()
         })
 
         vm.like.observe(this.viewLifecycleOwner, Observer {
@@ -46,5 +59,13 @@ class SearchFragment : BindingFragment<FragmentSearchBinding>() {
             }
             false
         }
+    }
+
+    private fun initAdapter(vm: SearchViewModel) {
+        vm.items.observe(this.viewLifecycleOwner, Observer {
+            val adapter = list.adapter as UserAdapter
+            adapter.submitList(it)
+        })
+        list.adapter = UserAdapter(vm)
     }
 }

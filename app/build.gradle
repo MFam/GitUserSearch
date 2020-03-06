@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.mfamstory.gituser"
         minSdkVersion 21
@@ -19,6 +19,22 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            applicationVariants.all { variant ->
+                variant.outputs.all {
+                    // BUG -> 항상 "GitUserSearch_debug.apk" 로만 나옴
+//                    outputFileName = "./../../../../../apks/GitUserSearch_${variant.versionName}_${new Date().format('yyyyMMdd_HHmm')}.apk"
+                    outputFileName = "GitUserSearch_${variant.versionName}_${new Date().format('yyyyMMdd_HHmm')}.apk"
+                }
+            }
+        }
+        debug {
+            applicationVariants.all { variant ->
+                variant.outputs.all {
+                    // GitUserSearch-master\app\build\outputs\apk\debug\GitUserSearch_debug.apk"
+//                    outputFileName = "./../../../../../apks/GitUserSearch_debug.apk"
+                    outputFileName = "GitUserSearch_debug.apk"
+                }
+            }
         }
     }
 
@@ -87,6 +103,8 @@ dependencies {
 
     // RecyclerView Animation
     implementation "jp.wasabeef:recyclerview-animators:$recyclerview_aniimators_version"
+    // After Effects Animation Library
+//    implementation "com.airbnb.android:lottie:$lottieVersion"
 
     // Paging
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
@@ -97,4 +115,6 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     implementation "androidx.room:room-rxjava2:$room_version"
+
+    // Dart & Henson
 }

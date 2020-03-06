@@ -4,26 +4,34 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
 import com.mfamstory.gituser.TAG
 import com.mfamstory.gituser.database.dao.LikeUserDao
 import com.mfamstory.gituser.database.entity.LikeUser
-import com.mfamstory.gituser.network.GithubAPI
 import com.mfamstory.gituser.network.model.User
+import com.mfamstory.gituser.network.model.UserSearchResult
+import com.mfamstory.gituser.paging.NetworkUserDataFactory
 import com.mfamstory.gituser.util.SingleLiveEvent
 import com.mfamstory.gituser.util.ioThread
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-class SearchViewModel(val api: GithubAPI, val dao: LikeUserDao) : DisposableViewModel() {
+class SearchViewModel(val dao: LikeUserDao) : DisposableViewModel() {
 
     private var et_query : String = ""
+    private val query : MutableLiveData<String> = MutableLiveData()
 
-    private var _items : MutableLiveData<List<User>> = MutableLiveData()
-    val items : MutableLiveData<List<User>> get() = _items
+    private val userSearchResult = Transformations.map(query, { requestUserSearch() })
 
-    private var _isLoading : MutableLiveData<Boolean> = MutableLiveData()
-    val isLoading : MutableLiveData<Boolean> get() = _isLoading
+    var items = Transformations.switchMap(userSearchResult, { it.data })
+
+    var isLoading = Transformations.switchMap(userSearchResult, { it.isInitialLoading })
+
+    var isDataEmpty = Transformations.switchMap(userSearchResult, { it.isEmpty })
+
+    var isNetworkError = Transformations.switchMap(userSearchResult, { it.networkErrors })
 
     private val _hideKeyboard = SingleLiveEvent<Boolean>()
     val hideKeyboard : LiveData<Boolean> get() = _hideKeyboard
@@ -31,35 +39,41 @@ class SearchViewModel(val api: GithubAPI, val dao: LikeUserDao) : DisposableView
     private val _like = SingleLiveEvent<Boolean>()
     val like : LiveData<Boolean> get() = _like
 
-    init {
-        _items.value = arrayListOf()
-    }
+    private val executor : Executor = Executors.newFixedThreadPool(5)
+    private val PAGE_SIZE = 10
+
 
     @SuppressLint("CheckResult")
     fun doSearch() {
+        Log.d(TAG, "doSearch===")
         if (et_query.isEmpty()) {
             return
         }
 
         _hideKeyboard.call()
 
-        val params = mapOf(
-            Pair("q", et_query),
-            Pair("page", 1.toString()),
-            Pair("per_page", 10.toString())
-        )
+        query.postValue(et_query)
+    }
 
-        addDisposable(api.searchUser(params)
-            .doOnSubscribe { _isLoading.postValue(true) }
-            .doOnSuccess { _isLoading.postValue(false) }
-            .doOnError { _isLoading.postValue(false) }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe( { res ->
-                _items.value = res.users
-            }, {
-                    t -> t.printStackTrace()
-            }))
+    fun requestUserSearch() : UserSearchResult {
+        val dataFactory = NetworkUserDataFactory(et_query)
+
+        val pagedListConfig = PagedList.Config.Builder()
+            .setPageSize(PAGE_SIZE)
+            .setInitialLoadSizeHint(PAGE_SIZE * 3) // default: page size * 3
+            .setPrefetchDistance(PAGE_SIZE) // default: page size
+            .setEnablePlaceholders(false) // default: true
+            .build()
+
+        val data = LivePagedListBuilder(dataFactory, pagedListConfig)
+            .setFetchExecutor(executor) // Thread : defaults to the Arch components I/O thread pool.
+            .build()
+
+        val initialLoading = Transformations.switchMap(dataFactory.getMutableLiveData(), {dataSource -> dataSource.isInitialLoading})
+        val networkError = Transformations.switchMap(dataFactory.getMutableLiveData(), {dataSource -> dataSource.networkStatusMsg})
+        val empty = Transformations.switchMap(dataFactory.getMutableLiveData(), {dataSource -> dataSource.isEmpty})
+
+        return UserSearchResult(data, initialLoading, networkError, empty)
     }
 
     fun onQueryChange(query : CharSequence) {
