@@ -20,7 +20,7 @@ import java.util.concurrent.Executors
 
 class SearchViewModel(val dao: LikeUserDao) : DisposableViewModel() {
 
-    private var et_query : String = ""
+    private var etQuery : String = ""
     private val query : MutableLiveData<String> = MutableLiveData()
 
     private val userSearchResult = Transformations.map(query, { requestUserSearch() })
@@ -46,17 +46,17 @@ class SearchViewModel(val dao: LikeUserDao) : DisposableViewModel() {
     @SuppressLint("CheckResult")
     fun doSearch() {
         Log.d(TAG, "doSearch===")
-        if (et_query.isEmpty()) {
+        if (etQuery.isEmpty()) {
             return
         }
 
         _hideKeyboard.call()
 
-        query.postValue(et_query)
+        query.postValue(etQuery)
     }
 
     fun requestUserSearch() : UserSearchResult {
-        val dataFactory = NetworkUserDataFactory(et_query)
+        val dataFactory = NetworkUserDataFactory(etQuery)
 
         val pagedListConfig = PagedList.Config.Builder()
             .setPageSize(PAGE_SIZE)
@@ -77,7 +77,7 @@ class SearchViewModel(val dao: LikeUserDao) : DisposableViewModel() {
     }
 
     fun onQueryChange(query : CharSequence) {
-        this.et_query = query.toString()
+        this.etQuery = query.toString()
     }
 
     fun onRefresh() {

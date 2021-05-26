@@ -17,16 +17,6 @@ class SearchFragment : BindingFragment<FragmentSearchBinding>() {
 
     override fun getLayoutResId() = R.layout.fragment_search
 
-    companion object {
-        @Volatile private var instance: SearchFragment? = null
-        @JvmStatic
-        fun getInstance(): SearchFragment = instance ?: synchronized(this) {
-            instance ?: SearchFragment().also {
-                instance = it
-            }
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val vm : SearchViewModel = getViewModel()
@@ -53,7 +43,7 @@ class SearchFragment : BindingFragment<FragmentSearchBinding>() {
             Snackbar.make(view, "Like!", Snackbar.LENGTH_SHORT).show()
         })
 
-        et_query.setOnEditorActionListener { _, actionId, _ ->
+        binding.etQuery.setOnEditorActionListener { _, actionId, _ ->
             when (actionId) {
                 EditorInfo.IME_ACTION_SEARCH -> vm.doSearch()
             }
@@ -67,5 +57,15 @@ class SearchFragment : BindingFragment<FragmentSearchBinding>() {
             adapter.submitList(it)
         })
         list.adapter = UserAdapter(vm)
+    }
+
+    companion object {
+        @Volatile private var instance: SearchFragment? = null
+        @JvmStatic
+        fun getInstance(): SearchFragment = instance ?: synchronized(this) {
+            instance ?: SearchFragment().also {
+                instance = it
+            }
+        }
     }
 }

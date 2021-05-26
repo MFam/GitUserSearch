@@ -12,7 +12,7 @@ import com.mfamstory.gituser.databinding.ItemSearchBinding
 import com.mfamstory.gituser.network.model.User
 import com.mfamstory.gituser.ui.viewmodel.SearchViewModel
 
-class UserAdapter (val vm : SearchViewModel) :
+class UserAdapter(val vm : SearchViewModel) :
     PagedListAdapter<User, UserAdapter.UserViewHolder>(USER_COMPARATOR) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {

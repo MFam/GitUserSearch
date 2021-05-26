@@ -18,18 +18,6 @@ class LikeFragment : BindingFragment<FragmentLikeBinding>() {
 
     override fun getLayoutResId() = R.layout.fragment_like
 
-    companion object {
-
-        @Volatile private var instance: LikeFragment? = null
-
-        @JvmStatic
-        fun getInstance(): LikeFragment = instance ?: synchronized(this) {
-            instance ?: LikeFragment().also {
-                instance = it
-            }
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val vm : LikeViewModel = getViewModel()
@@ -47,6 +35,16 @@ class LikeFragment : BindingFragment<FragmentLikeBinding>() {
                     vm.removeUser(it)
                 }
             }
-        }).attachToRecyclerView(list)
+        }).attachToRecyclerView(binding.likeList)
+    }
+
+    companion object {
+        @Volatile private var instance: LikeFragment? = null
+        @JvmStatic
+        fun getInstance(): LikeFragment = instance ?: synchronized(this) {
+            instance ?: LikeFragment().also {
+                instance = it
+            }
+        }
     }
 }
